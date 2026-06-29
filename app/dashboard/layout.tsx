@@ -35,6 +35,9 @@ export default async function DashboardLayout({
             <Link href="/dashboard/assets" className="text-sm font-medium text-gray-600 hover:text-blue-600">
               Assets
             </Link>
+            <Link href="/dashboard/sla" className="text-sm font-medium text-gray-600 hover:text-blue-600">
+              SLA
+            </Link>
           </div>
 
           <div className="flex items-center gap-4">
