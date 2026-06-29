@@ -46,17 +46,12 @@ export default async function TicketsListPage() {
   const isAdmin = profile?.role === 'admin'
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="p-8">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              {isAdmin ? 'Semua Ticket' : 'Ticket Saya'}
-            </h1>
-            <Link href="/dashboard" className="text-sm text-gray-500 hover:underline">
-              ← Kembali ke Dashboard
-            </Link>
-          </div>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            {isAdmin ? 'Semua Ticket' : 'Ticket Saya'}
+          </h1>
           <Link
             href="/dashboard/tickets/new"
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"

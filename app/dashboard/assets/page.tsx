@@ -37,15 +37,10 @@ export default async function AssetsListPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="p-8">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Asset IT</h1>
-            <Link href="/dashboard" className="text-sm text-gray-500 hover:underline">
-              ← Kembali ke Dashboard
-            </Link>
-          </div>
+          <h1 className="text-2xl font-semibold text-gray-900">Asset IT</h1>
           {isAdmin && (
             <Link
               href="/dashboard/assets/new"

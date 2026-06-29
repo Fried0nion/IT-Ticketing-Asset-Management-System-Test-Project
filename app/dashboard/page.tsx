@@ -1,6 +1,6 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { logout } from '@/app/actions'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -10,37 +10,54 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  // Ambil data profile (termasuk role) dari tabel profiles
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, role, email')
+    .select('full_name, role')
     .eq('id', user.id)
     .single()
 
+  // Hitung ringkasan singkat untuk ditampilkan di kartu.
+  // RLS otomatis membatasi: user biasa hanya menghitung ticket miliknya.
+  const { count: openTicketCount } = await supabase
+    .from('tickets')
+    .select('id', { count: 'exact', head: true })
+    .in('status', ['open', 'in_progress'])
+
+  const { count: assetCount } = await supabase
+    .from('assets')
+    .select('id', { count: 'exact', head: true })
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-2xl rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-          <form action={logout}>
-            <button
-              type="submit"
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Keluar
-            </button>
-          </form>
-        </div>
-
-        <div className="space-y-2 text-sm text-gray-700">
-          <p><span className="font-medium">Email:</span> {user.email}</p>
-          <p><span className="font-medium">Nama:</span> {profile?.full_name ?? '(belum diisi)'}</p>
-          <p><span className="font-medium">Role:</span> {profile?.role ?? 'user'}</p>
-        </div>
-
-        <p className="mt-6 text-sm text-gray-500">
-          Ini halaman sementara. Selanjutnya kita bangun fitur ticket &amp; asset management di sini.
+    <div className="p-8">
+      <div className="mx-auto max-w-5xl">
+        <h1 className="mb-1 text-2xl font-semibold text-gray-900">
+          Halo, {profile?.full_name ?? 'kamu'} 👋
+        </h1>
+        <p className="mb-6 text-sm text-gray-500">
+          Ini ringkasan singkat aktivitas IT Ticketing kamu.
         </p>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Link
+            href="/dashboard/tickets"
+            className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md"
+          >
+            <p className="text-sm text-gray-500">
+              {profile?.role === 'admin' ? 'Total Ticket Aktif' : 'Ticket Aktif Saya'}
+            </p>
+            <p className="mt-1 text-3xl font-semibold text-gray-900">{openTicketCount ?? 0}</p>
+            <p className="mt-2 text-sm font-medium text-blue-600">Lihat semua ticket →</p>
+          </Link>
+
+          <Link
+            href="/dashboard/assets"
+            className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md"
+          >
+            <p className="text-sm text-gray-500">Total Asset Terdaftar</p>
+            <p className="mt-1 text-3xl font-semibold text-gray-900">{assetCount ?? 0}</p>
+            <p className="mt-2 text-sm font-medium text-blue-600">Lihat semua asset →</p>
+          </Link>
+        </div>
       </div>
     </div>
   )
