@@ -180,3 +180,102 @@ export async function addComment(formData: FormData) {
   redirect(`/dashboard/tickets/${ticketId}`)
 }
 
+export async function createAsset(formData: FormData) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    redirect('/login')
+  }
+
+  const name = formData.get('name') as string
+  const category = formData.get('category') as string
+  const serialNumber = formData.get('serial_number') as string
+  const status = formData.get('status') as string
+  const assignedTo = formData.get('assigned_to') as string
+  const purchaseDate = formData.get('purchase_date') as string
+  const warrantyExpiry = formData.get('warranty_expiry') as string
+  const notes = formData.get('notes') as string
+
+  // RLS akan otomatis menolak insert ini kalau user bukan admin
+  // (lihat policy assets_insert_admin_only).
+  const { error } = await supabase.from('assets').insert({
+    name,
+    category,
+    serial_number: serialNumber || null,
+    status,
+    assigned_to: assignedTo || null,
+    purchase_date: purchaseDate || null,
+    warranty_expiry: warrantyExpiry || null,
+    notes: notes || null,
+  })
+
+  if (error) {
+    redirect(`/dashboard/assets/new?error=${encodeURIComponent(error.message)}`)
+  }
+
+  revalidatePath('/dashboard/assets')
+  redirect('/dashboard/assets')
+}
+
+export async function updateAsset(formData: FormData) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    redirect('/login')
+  }
+
+  const assetId = formData.get('asset_id') as string
+  const name = formData.get('name') as string
+  const category = formData.get('category') as string
+  const serialNumber = formData.get('serial_number') as string
+  const status = formData.get('status') as string
+  const assignedTo = formData.get('assigned_to') as string
+  const purchaseDate = formData.get('purchase_date') as string
+  const warrantyExpiry = formData.get('warranty_expiry') as string
+  const notes = formData.get('notes') as string
+
+  const { error } = await supabase
+    .from('assets')
+    .update({
+      name,
+      category,
+      serial_number: serialNumber || null,
+      status,
+      assigned_to: assignedTo || null,
+      purchase_date: purchaseDate || null,
+      warranty_expiry: warrantyExpiry || null,
+      notes: notes || null,
+    })
+    .eq('id', assetId)
+
+  if (error) {
+    redirect(`/dashboard/assets/${assetId}?error=${encodeURIComponent(error.message)}`)
+  }
+
+  revalidatePath(`/dashboard/assets/${assetId}`)
+  revalidatePath('/dashboard/assets')
+  redirect(`/dashboard/assets/${assetId}`)
+}
+
+export async function deleteAsset(formData: FormData) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    redirect('/login')
+  }
+
+  const assetId = formData.get('asset_id') as string
+
+  const { error } = await supabase.from('assets').delete().eq('id', assetId)
+
+  if (error) {
+    redirect(`/dashboard/assets/${assetId}?error=${encodeURIComponent(error.message)}`)
+  }
+
+  revalidatePath('/dashboard/assets')
+  redirect('/dashboard/assets')
+}
+
